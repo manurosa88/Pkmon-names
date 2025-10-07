@@ -7,6 +7,8 @@ from datetime import datetime
 import streamlit as st
 import pandas as pd
 import random
+import os
+SECRET_KEY = os.getenv("SECRET_KEY", "")
 
 DB_PATH = "names.db"
 
