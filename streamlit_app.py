@@ -8,9 +8,43 @@ import streamlit as st
 import pandas as pd
 import random
 import os
-SECRET_KEY = os.getenv("SECRET_KEY", "")
+import requests
+import unicodedata
 
+SECRET_KEY = os.getenv("SECRET_KEY", "")
 DB_PATH = "names.db"
+
+POKEMON_MAX_ID = 1010  # up to Gen 9; safe upper bound
+
+@st.cache_data(show_spinner=False)
+def fetch_pokemon_data(poke_id: int):
+    """Fetch Pokémon data from PokéAPI with simple retry + fallback."""
+    url = f"https://pokeapi.co/api/v2/pokemon/{poke_id}"
+    try:
+        r = requests.get(url, timeout=8)
+        r.raise_for_status()
+        data = r.json()
+        name = data["name"].capitalize()
+        # Official artwork (PNG)
+        art = data["sprites"]["other"]["official-artwork"]["front_default"]
+        # Try an animated GIF from Pokémon Showdown (fallback to None)
+        slug = normalize_for_showdown(data["name"])
+        gif_url = f"https://play.pokemonshowdown.com/sprites/ani/{slug}.gif"
+        # quick HEAD to see if it exists
+        ok = requests.head(gif_url, timeout=5).status_code == 200
+        gif = gif_url if ok else None
+        return {"name": name, "art": art, "gif": gif}
+    except Exception:
+        return None
+
+def normalize_for_showdown(name: str) -> str:
+    """
+    Convert API name to Showdown slug (lowercase, de-accent, spaces->-, etc).
+    Works for most standard species.
+    """
+    s = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    s = s.lower().replace(" ", "-").replace("'", "")
+    return s
 
 # ---------- DB helpers ----------
 def get_conn():
