@@ -107,6 +107,20 @@ with st.sidebar:
 
 conn = get_conn()
 
+
+if "landing_pokemon" not in st.session_state:
+    st.session_state.landing_pokemon = fetch_pokemon_data(random.randint(1, POKEMON_MAX_ID))
+
+lp = st.session_state.landing_pokemon
+if lp:
+    col_a, col_b = st.columns([1,4])
+    with col_a:
+        st.image(lp["gif"] or lp["art"], width=120)
+    with col_b:
+        st.subheader(f"Today’s spotlight: {lp['name']}")
+
+
+
 # Tabs
 tab_collect, tab_assign, tab_export = st.tabs(["📝 Collect Names", "🧢 Assign to Pokémon", "📦 Export"])
 
