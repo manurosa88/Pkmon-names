@@ -61,10 +61,6 @@ def clear_assignments(conn):
 
 # ---------- App ----------
 st.set_page_config(page_title="Pokémon Name Jar", page_icon="🎲", layout="centered")
-st.image(
-    "https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pokémon_logo.svg",
-    width=260,
-)
 st.title("🎲 Pokémon Name Jar")
 
 with st.sidebar:
